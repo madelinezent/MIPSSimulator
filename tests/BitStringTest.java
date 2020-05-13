@@ -1,9 +1,10 @@
 package tests;
 
-import static org.junit.Assert.*;
+import computer.BitString;
 import org.junit.Before;
 import org.junit.Test;
-import computer.BitString;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the BitString class methods.
