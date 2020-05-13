@@ -18,10 +18,10 @@ public class BitString {
     private final static int MAX_BITS = 32;
     private final static int MAX_VALUE = 2_147_483_647; // 2^31 - 1
     private final static int MIN_VALUE = -2_147_483_648; // -2^31
-    //made this BigInteger since it was too big to be an int
-    private final static BigInteger MAX_UNSIGNED_VALUE = 
+    // Made this BigInteger since it was too big to be an int
+    private final static BigInteger MAX_UNSIGNED_VALUE =
             new BigInteger("4294967296"); // 2^32 - 1
-    
+
     private char[] mBits;
     private int mLength;
 
@@ -208,7 +208,6 @@ public class BitString {
 
     /**
      * Returns a substring of the given string. 
-     * @param source
      * @param start
      * @param length
      * @return A new BitString is created from the source starting at the index
