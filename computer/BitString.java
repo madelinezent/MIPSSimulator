@@ -24,7 +24,22 @@ public class BitString {
 
     private char[] mBits;
     private int mLength;
+    private boolean isRFormat;
+    private boolean isIFormat;
+    private boolean isJFormat;
 
+    /**
+     * This constructs a BitString object specifying whether or not it this BitString
+     * is a R, I, or J-format instruction
+     * @param rFormat specifier for whether or not this BitString is a R-format instruction
+     * @param iFormat specifier for whether or not this BitString is a I-format instruction
+     * @param jFormat specifier for whether or not this BitString is a J-format instruction
+     */
+    public BitString(boolean rFormat, boolean iFormat, boolean jFormat) {
+        isRFormat = rFormat;
+        isIFormat = iFormat;
+        isJFormat = jFormat;
+    }
 
     /**
      * Sets the corresponding bits by copying and also sets the length
@@ -138,7 +153,7 @@ public class BitString {
         if (mBits == null) {
             throw new IllegalArgumentException("Nothing to copy.");
         }
-        BitString copy = new BitString();
+        BitString copy = new BitString(this.isRFormat, this.isIFormat, this.isJFormat);
         copy.mLength = mLength;
         copy.mBits = Arrays.copyOf(mBits, mLength);
         return copy;
@@ -189,7 +204,7 @@ public class BitString {
         if (mBits == null || other == null) {
             throw new IllegalArgumentException("Bit String must be set first.");
         }
-        BitString bitString = new BitString();
+        BitString bitString = new BitString(this.isRFormat, this.isIFormat, this.isJFormat);
         if (mLength + other.mLength > MAX_BITS) {
             throw new IllegalArgumentException("Exceeds bit string length");
         }
@@ -214,7 +229,7 @@ public class BitString {
      *         and with the length.
      */
     public BitString substring(int start, int length) {
-        BitString subStr = new BitString();
+        BitString subStr = new BitString(this.isRFormat, this.isIFormat, this.isJFormat);
         subStr.mBits = new char[length];
         int i;
         for (i = 0; i < length; i++) {
@@ -240,5 +255,15 @@ public class BitString {
         return mLength;
     }
 
-    
+    public boolean isRFormat() {
+        return isRFormat;
+    }
+
+    public boolean isIFormat() {
+        return isIFormat;
+    }
+
+    public boolean isJFormat() {
+        return isJFormat;
+    }
 }
