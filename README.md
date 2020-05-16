@@ -1,3 +1,1 @@
-If you are a dog
-I like you
-(MIPS simulator)
+If you are a dog then the MIPS simulator was inside you all along
