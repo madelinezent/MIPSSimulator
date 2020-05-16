@@ -80,7 +80,7 @@ public class Computer {
         if (funct == 32) {
             executeRegAdd();
         } else if (funct == 36) {
-            //AND
+            executeRegAnd();
         }
     }
     
@@ -92,10 +92,21 @@ public class Computer {
         int rt = mIR.getRt();
         int rd = mIR.getRd();
         int sum = getRegister(rs).getValue2sComp() + getRegister(rt).getValue2sComp();
-        if (sum <= MIN_VALUE || sum >= MAX_VALUE) {
-            throw new IllegalArgumentException("Arithmetic Overflow: Rs and Rts values are too large.");
+        if ((rs > 0 && rt > 0 && sum < 0) || (rs < 0 && rt < 0 && sum > 0)) {
+            throw new IllegalArgumentException("Arithmetic Overflow from register add.");
         }
         setRegister(rd, sum);
+    }
+    
+    /**
+     * Does a bitwise and of values in Rs and Rt and puts it in Rd.
+     */
+    public void executeRegAnd() {
+        int rs = mIR.getRs();
+        int rt = mIR.getRt();
+        int rd = mIR.getRd();
+        int and = getRegister(rs).getValue2sComp() & getRegister(rt).getValue2sComp();
+        setRegister(rd, and);
     }
     
     /** 
@@ -236,16 +247,5 @@ public class Computer {
         mInstrMemory[memoryAddress] = memoryValue;
     }
     
-    
-    /**
-     * Performs not operation by using the data from the register based on bits[7:9] 
-     * and inverting and storing in the register based on bits[4:6]
-     */
-    public void executeNot() {
-        BitString destBS = mIR.substring(4, 3);
-        BitString sourceBS = mIR.substring(7, 3);
-        mRegisters[destBS.getValue()] = mRegisters[sourceBS.getValue()].copy();
-        mRegisters[destBS.getValue()].invert();
-    }
 }
 
