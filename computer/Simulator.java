@@ -1,3 +1,7 @@
+package computer;
+
+import org.junit.runner.Computer;
+
 public class Simulator {
 
 	public static void main(String[] args) {
@@ -24,6 +28,8 @@ public class Simulator {
 				"0001010000000001", "0000010000000011", "1111000000100001",
 				"0001000000111111", "0000111111111011", "1111000000100101",
 				"0000000000111001", "1111111111010000" };
+		String[] instructionMemory = new String[200];
+		String[] dataMemory = new String[500];
 
 		/*
 		 * This is the assembly program that was compiled into the binary
