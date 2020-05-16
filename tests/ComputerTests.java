@@ -184,6 +184,23 @@ public class ComputerTests {
         }
     }  
     
+    /**
+     * Tests if the register bitwise works correctly.
+     * 1. Load instr and $4, $5, $6
+     * 2. Fill register $5 with 48 and $6 with 63
+     * 3. Call function and check if Rd was filled with 48
+     */
+    @Test
+    public void testRegAnd() {
+        computerTest.setRegister(5, 48);
+        computerTest.setRegister(6, 63);
+        BitString andInstr = new BitString();
+        andInstr.setBits("00000000101001100010000000100100".toCharArray());
+        computerTest.loadWord(0, andInstr);
+        computerTest.execute();
+        System.out.println(computerTest.getRegister(4).getValue2sComp());
+        assertEquals(48, computerTest.getRegister(4).getValue2sComp());
+    }  
     
     
 }
