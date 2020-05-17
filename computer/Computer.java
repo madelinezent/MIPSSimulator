@@ -107,13 +107,11 @@ public class Computer {
      * Does a register add of the values in Rs and Rt into Rd.
      */
     public void executeRegAdd() {
-        int rs = mIR.getRs();
-        int rt = mIR.getRt();
+        int rs = getRegister(mIR.getRs()).getValue2sComp();
+        int rt = getRegister(mIR.getRt()).getValue2sComp();
         int rd = mIR.getRd();
-        int sum = getRegister(rs).getValue2sComp() + getRegister(rt).getValue2sComp();
-        if ((getRegister(rs).getValue2sComp() > 0 && getRegister(rt).getValue2sComp() > 0 && sum < 0) 
-                || (getRegister(rs).getValue2sComp() < 0 && getRegister(rt).getValue2sComp() < 0 
-                        && sum > 0)) {
+        int sum = rs + rt;
+        if ((rs > 0 && rt > 0 && sum < 0) || (rs < 0 && rt < 0 && sum > 0)) {
             throw new IllegalArgumentException("Arithmetic Overflow from register add.");
         }
         setRegister(rd, sum);
