@@ -16,10 +16,13 @@ public class ComputerTests {
     private final static int MAX_REGISTERS = 32;
     private final static int MAX_VALUE = 2_147_483_647; // 2^31 - 1
     private Computer computerTest;
+    private BitString halt;
 
     @Before
     public void setUp() throws Exception {
         computerTest = new Computer();
+        halt = new BitString();
+        halt.setBits("00000000000000000000000000001100".toCharArray());
     }
 
     /**
@@ -34,22 +37,22 @@ public class ComputerTests {
             assertEquals(0, computerTest.getRegister(i).getValue());
         }
         for (int i = 0; i < MAX_INSTR_MEMORY; i++) {
-            assertEquals(0, computerTest.getInstrMemoryAddress(i).getValue());
+            assertEquals(0, computerTest.getInstr(i).getValue());
         }
         for (int i = 0; i < MAX_MEMORY; i++) {
-            assertEquals(0, computerTest.getMemoryAddress(i).getValue());
+            assertEquals(0, computerTest.getDataMemoryAddress(i).getValue());
         }
     }
 
     /**
-     * Checks to see if illegal words can be loaded into data memory.
+     * Checks to see if illegal words can be loaded into instruction memory.
      */
     @Test
     public void testIllegalLoadWord() {
         try {
             BitString test = new BitString();
             test.setValue(32);
-            computerTest.loadWord(-5, test);
+            computerTest.loadInstr(-5, test);
             fail("testIllegalLoadWord failed");
         } catch (IllegalArgumentException ie) {
         }
@@ -62,8 +65,8 @@ public class ComputerTests {
     public void testLoadWord() {
         BitString test = new BitString();
         test.setValue(32);
-        computerTest.loadWord(5, test);
-        assertEquals(test, computerTest.getMemoryAddress(5));
+        computerTest.loadInstr(5, test);
+        assertEquals(test, computerTest.getInstr(5));
     }
 
     /**
@@ -101,28 +104,6 @@ public class ComputerTests {
         assertArrayEquals(computerTest.getRegister(4).getBits(), test.getBits());
     }
 
-    /**
-     * Check if we can set an illegal memory address.
-     */
-    @Test
-    public void testIllegalSetMemoryAddress() {
-        try {
-            computerTest.setMemoryAddress(MAX_MEMORY, 5);
-            fail("testIllegalSetMemoryAddress failed, illegal address allowed.");
-        } catch (IllegalArgumentException ie) {
-        }
-    }
-
-    /**
-     * Check if we can set a memory address with a value.
-     */
-    @Test
-    public void testSetMemoryAddress() {
-        BitString test = new BitString();
-        test.setValue(800);
-        computerTest.setMemoryAddress(78, 800);
-        assertArrayEquals(computerTest.getMemoryAddress(78).getBits(), test.getBits());
-    }
 
     /**
      * Check setting an illegal instruction memory address.
@@ -130,7 +111,9 @@ public class ComputerTests {
     @Test
     public void testIllegalSetInstrMemoryAddress() {
         try {
-            computerTest.setInstrMemoryAddress(MAX_INSTR_MEMORY, 5);
+            BitString test = new BitString();
+            test.setValue2sComp(4);
+            computerTest.loadInstr(MAX_INSTR_MEMORY, test);
             fail("testIllegalSetInstrMemoryAddress failed, illegal address allowed.");
         } catch (IllegalArgumentException ie) {
         }
@@ -143,8 +126,8 @@ public class ComputerTests {
     public void testSetInstrMemoryAddress() {
         BitString test = new BitString();
         test.setValue(2000);
-        computerTest.setInstrMemoryAddress(78, 2000);
-        assertArrayEquals(computerTest.getInstrMemoryAddress(78).getBits(), test.getBits());
+        computerTest.loadInstr(78, test);
+        assertArrayEquals(computerTest.getInstr(78).getBits(), test.getBits());
     }   
 
     /**
@@ -159,7 +142,8 @@ public class ComputerTests {
         computerTest.setRegister(11, 12);
         BitString addInstr = new BitString();
         addInstr.setBits("00000001010010110100100000100000".toCharArray());
-        computerTest.loadWord(0, addInstr);
+        computerTest.loadInstr(0, addInstr);
+        computerTest.loadInstr(1, halt);
         computerTest.execute();
         assertEquals(17, computerTest.getRegister(9).getValue2sComp());
     }  
@@ -176,7 +160,7 @@ public class ComputerTests {
         computerTest.setRegister(11, MAX_VALUE);
         BitString addInstr = new BitString();
         addInstr.setBits("00000001010010110100100000100000".toCharArray());
-        computerTest.loadWord(0, addInstr);
+        computerTest.loadInstr(0, addInstr);
         try {
         computerTest.execute();
         fail("Register add does not correctly measure overflow.");
@@ -196,11 +180,12 @@ public class ComputerTests {
         computerTest.setRegister(6, 63);
         BitString andInstr = new BitString();
         andInstr.setBits("00000000101001100010000000100100".toCharArray());
-        computerTest.loadWord(0, andInstr);
+        computerTest.loadInstr(0, andInstr);
+        computerTest.loadInstr(1, halt);
         computerTest.execute();
         System.out.println(computerTest.getRegister(4).getValue2sComp());
         assertEquals(48, computerTest.getRegister(4).getValue2sComp());
     }  
-    
-    
 }
+
+
