@@ -148,7 +148,7 @@ public class BitString {
 
     /**
      * Displays the BitString in groups of four or
-     * in one group of 16. 
+     * in one group of 32.
      * @param groupsOfFour 
      */
     public void display(boolean groupsOfFour) {

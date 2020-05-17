@@ -109,6 +109,56 @@ public class Computer {
         int and = getRegister(rs).getValue2sComp() & getRegister(rt).getValue2sComp();
         setRegister(rd, and);
     }
+
+    /**
+     * Does an add immediate operation storing R[rt] with R[rs] + SignExtImm
+     */
+    public void executeImmAdd() {
+        int rs = mIR.getRs();
+        int rt = mIR.getRt();
+        int imm = mIR.getImm();
+        int sum = rs + imm;
+        if ((rs > 0 && rt > 0 && sum < 0) || (rs < 0 && rt < 0 && sum > 0)) {
+            throw new IllegalArgumentException("Arithmetic Overflow from immediate add.");
+        }
+        setRegister(rt, sum);
+    }
+
+    /**
+     * Does an immediate load word operation storing R[rt] with
+     * M[R[rs] + SignExtImm]
+     */
+    public void executeImmLoadWord() {
+        int rt = mIR.getRt();
+        int rs = mIR.getRs();
+        int imm = mIR.getImm();
+        int offset = rs + imm;
+        // Check if R[rs] + SignExtImm creates arithmetic overflow
+        if ((rs > 0 && imm > 0 && offset < 0) || (rs < 0 && imm < 0 && offset > 0)) {
+            throw new IllegalArgumentException("Arithmetic Overflow from offset add.");
+        }
+        // Check if R[rs] + SignExtImm is out of bounds of mMemory
+        if (offset > MAX_MEMORY || offset < 0) {
+            throw new ArrayIndexOutOfBoundsException("Offset to large/small");
+        }
+        BitString dataMemory = getMemoryAddress(offset);
+        setRegister(rt, dataMemory);
+    }
+
+    /**
+     * Does an immediate branch on equal operation storing PC with PC + 4 +
+     * BranchAddr if R[rs] == R[rt]
+     */
+    public void executeImmBEQ() {
+
+    }
+
+    /**
+     * Does an jump operation storing PC with JumpAddr
+     */
+    public void executeJJump() {
+
+    }
     
     /** 
      * Returns the PC value. 
@@ -128,6 +178,7 @@ public class Computer {
         System.out.print("IR ");
         mPC.display(true);
         System.out.print("   ");
+        System.out.println();
 
         for (int i = 0; i < MAX_REGISTERS; i++) {
             System.out.printf("R%d ", i);
@@ -140,8 +191,19 @@ public class Computer {
         }
         System.out.println();
 
+        for (int i = 0; i < MAX_INSTR_MEMORY; i++) {
+            System.out.printf("IM%3d ", i);
+            mInstrMemory[i].display(true);
+            if (i % 3 == 2) {
+                System.out.println();
+            } else {
+                System.out.print("   ");
+            }
+        }
+        System.out.println();
+
         for (int i = 0; i < MAX_MEMORY; i++) {
-            System.out.printf("%3d ", i);
+            System.out.printf("DM%3d ", i);
             mMemory[i].display(true);
             if (i % 3 == 2) {
                 System.out.println();
@@ -167,7 +229,7 @@ public class Computer {
     
     /** 
      * Returns 32 bits within an inputted register
-     * @param the register
+     * @param register
      * @return the 32 character BitString in the register
      */
     public BitString getRegister(int register) {
@@ -180,7 +242,7 @@ public class Computer {
     /**
      * Sets the value within a register.
      * @param register to change value
-     * @param int value to change register to
+     * @param value to change register to
      */
     public void setRegister(int register, int value) {
         if (register < 0 || register >= MAX_REGISTERS || value < MIN_VALUE || value > MAX_VALUE) {
@@ -192,6 +254,22 @@ public class Computer {
         BitString registerValue = new BitString();
         registerValue.setValue2sComp(value);
         mRegisters[register] = registerValue;
+    }
+
+    /**
+     * Sets the value within a register directly to a BitString .
+     * @param register to change value
+     * @param value to change register to a given BitString
+     */
+    public void setRegister(int register, BitString value) {
+        if (register < 0 || register >= MAX_REGISTERS || value.getValue() < MIN_VALUE
+                || value.getValue() > MAX_VALUE) {
+            throw new IllegalArgumentException("Invalid Parameters");
+        }
+        if (register == 0) {
+            throw new IllegalArgumentException("Cannot change the value in regsiter 0!");
+        }
+        mRegisters[register] = value;
     }
     
     /**
