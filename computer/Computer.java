@@ -65,8 +65,22 @@ public class Computer {
             opCode = mIR.getOpcode();
             // What instruction is this?
             if (opCode == 0) { // R-type
-                identifyRFormatInstr();
-                return;
+                if (identifyRFormatInstr() == 1) { break; }
+            } else if (opCode == 2) {
+                //execute jump
+            } else if (opCode == 4) {
+                //execute jal
+            } else if (opCode == 4) {
+                //execute branch on equal
+            } else if (opCode == 8) {
+                executeImmAdd();
+            } else if (opCode == 12) {
+                //execute imm and
+            }
+            else if (opCode == 35) {
+                executeImmLoadWord();
+            } else if (opCode == 43) {
+                executeStoreWord();
             }
             int newPC = mPC.getValue() + 4;
             mPC.setValue2sComp(newPC);
@@ -77,13 +91,17 @@ public class Computer {
      * This method is used to determine the specific type of R-format
      * an instruction a BitString is.
      */
-    public void identifyRFormatInstr() {
+    public int identifyRFormatInstr() {
         int funct = mIR.getFunct();
-        if (funct == 32) {
+        if (funct == 32) { 
             executeRegAdd();
         } else if (funct == 36) {
             executeRegAnd();
+        } else if (funct == 12) {
+            //Terminating call
+            return 1;
         }
+        return 0;
     }
     
     /**
@@ -94,7 +112,9 @@ public class Computer {
         int rt = mIR.getRt();
         int rd = mIR.getRd();
         int sum = getRegister(rs).getValue2sComp() + getRegister(rt).getValue2sComp();
-        if ((rs > 0 && rt > 0 && sum < 0) || (rs < 0 && rt < 0 && sum > 0)) {
+        if ((getRegister(rs).getValue2sComp() > 0 && getRegister(rt).getValue2sComp() > 0 && sum < 0) 
+                || (getRegister(rs).getValue2sComp() < 0 && getRegister(rt).getValue2sComp() < 0 
+                        && sum > 0)) {
             throw new IllegalArgumentException("Arithmetic Overflow from register add.");
         }
         setRegister(rd, sum);
@@ -110,7 +130,7 @@ public class Computer {
         int and = getRegister(rs).getValue2sComp() & getRegister(rt).getValue2sComp();
         setRegister(rd, and);
     }
-
+    
     /**
      * Does an add immediate operation storing R[rt] with R[rs] + SignExtImm
      */
@@ -150,6 +170,25 @@ public class Computer {
         BitString dataMemory = getDataMemoryAddress(offset);
         // Load BitString into register
         setRegister(rt, dataMemory);
+    }
+    
+    /** 
+     * Set the value at a data memory address to the word at Rt.
+     * R[rt] = M[R[rs] + SignExtImm]
+     */
+    public void executeStoreWord() {
+        int rs = getRegister(mIR.getRs()).getValue2sComp();
+        int imm = mIR.getImm();
+        int memoryAddress = getRegister(rs).getValue2sComp() + imm;
+        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY) {
+            throw new IllegalArgumentException("Invalid Parameters");
+        }
+        // Check if R[rs] + SignExtImm creates arithmetic overflow
+        if ((rs > 0 && imm > 0 && memoryAddress < 0)
+                || (rs < 0 && imm < 0 && memoryAddress > 0)) {
+            throw new IllegalArgumentException("Arithmetic Overflow from offset add.");
+        }
+        mMemory[memoryAddress] = getRegister(mIR.getRt());
     }
 
     /**
@@ -305,4 +344,3 @@ public class Computer {
         return mMemory[offset];
     }
 }
-
