@@ -1,7 +1,5 @@
 package computer;
 
-import org.junit.runner.Computer;
-
 public class Simulator {
 
 	public static void main(String[] args) {
@@ -71,5 +69,4 @@ public class Simulator {
 		/* shows final configuration of computer */
 		comp.display();
 	}
-
 }
