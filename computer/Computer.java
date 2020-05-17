@@ -118,8 +118,9 @@ public class Computer {
         int rs = mIR.getRs();
         int rt = mIR.getRt();
         int imm = mIR.getImm();
-        int sum = rs + imm;
-        if ((rs > 0 && rt > 0 && sum < 0) || (rs < 0 && rt < 0 && sum > 0)) {
+        int valueRs = mRegisters[rs].getValue2sComp();
+        int sum = valueRs + imm;
+        if ((valueRs > 0 && imm > 0 && sum < 0) || (valueRs < 0 && imm < 0 && sum > 0)) {
             throw new IllegalArgumentException("Arithmetic Overflow from immediate add.");
         }
         setRegister(rt, sum);
@@ -132,17 +133,22 @@ public class Computer {
     public void executeImmLoadWord() {
         int rt = mIR.getRt();
         int rs = mIR.getRs();
+        int valueRs = mRegisters[rs].getValue2sComp();
         int imm = mIR.getImm();
-        int offset = rs + imm;
+        // Calculate target address
+        int offset = valueRs + imm;
         // Check if R[rs] + SignExtImm creates arithmetic overflow
-        if ((rs > 0 && imm > 0 && offset < 0) || (rs < 0 && imm < 0 && offset > 0)) {
+        if ((valueRs > 0 && imm > 0 && offset < 0)
+                || (valueRs < 0 && imm < 0 && offset > 0)) {
             throw new IllegalArgumentException("Arithmetic Overflow from offset add.");
         }
+
         // Check if R[rs] + SignExtImm is out of bounds of mMemory
         if (offset > MAX_MEMORY || offset < 0) {
             throw new ArrayIndexOutOfBoundsException("Offset to large/small");
         }
-        BitString dataMemory = getMemoryAddress(offset);
+        BitString dataMemory = getDataMemoryAddress(offset);
+        // Load BitString into register
         setRegister(rt, dataMemory);
     }
 
@@ -160,22 +166,6 @@ public class Computer {
     public void executeJJump() {
 
     }
-    
-    /** 
-     * Set the value at a data memory address to an int value.
-     * @param memoryAddress is an int location  
-     * @param value is the int bits to place at a location
-     */
-    public void executeLoadWord(int memoryAddress, int value) {
-        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY 
-                || value < MIN_VALUE || value > MAX_VALUE) {
-            throw new IllegalArgumentException("Invalid Parameters");
-        }
-        BitString memoryValue = new BitString();
-        memoryValue.setValue2sComp(value);
-        mMemory[memoryAddress] = memoryValue;
-    }
-    
     
     /** 
      * Returns the PC value. 
@@ -276,18 +266,6 @@ public class Computer {
         }
         mRegisters[register] = value;
     }
-    
-    /**
-     * Gets an instruction at a value in the instruction memory. 
-     * @param memoryAddress is an int location
-     * @return the BitString at the memory address
-     */
-    public BitString getInstruction(int memoryAddress) {
-        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY) {
-            throw new IllegalArgumentException();
-        }
-        return mInstrMemory[memoryAddress];
-    }
 
     /**
      * Gets the instruction memory at a certain address.
@@ -300,12 +278,11 @@ public class Computer {
         }
         return mInstrMemory[memoryAddress];
     }
-    
 
     /**
      * Sets an instruction memory address to a word.
      * @param memoryAddress is the address to change
-     * @param value is the new number to store at that address
+     * @param word is the new number to store at that address
      */
     public void loadInstr(int memoryAddress, BitString word) {
         if (memoryAddress < 0 || memoryAddress >= MAX_INSTR_MEMORY || 
@@ -314,6 +291,18 @@ public class Computer {
         }
         mInstrMemory[memoryAddress] = word;
     }
-    
+
+    /**
+     * Returns the BitString located at a calculated target address in the
+     * Data Memory unit
+     * @param offset the calculated target address
+     * @return BitString located at calculated target address
+     */
+    public BitString getDataMemoryAddress(int offset) {
+        if (offset < 0 || offset > MAX_MEMORY) {
+            throw new IllegalArgumentException("Offset too large/small");
+        }
+        return mMemory[offset];
+    }
 }
 

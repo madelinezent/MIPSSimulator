@@ -311,11 +311,11 @@ public class BitString {
     }
     
     public int getImm() {
-        return substring(16, 16).getValue();
+        return substring(16, 16).getValue2sComp();
     }
     
     public int getAddr() {
-        return substring(6, 26).getValue();
+        return substring(6, 26).getValue2sComp();
     }
     
 }
