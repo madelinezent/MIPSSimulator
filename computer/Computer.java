@@ -71,13 +71,12 @@ public class Computer {
             } else if (opCode == 4) {
                 //execute jal
             } else if (opCode == 4) {
-                //execute branch on equal
+                //execute imm branch on equal
             } else if (opCode == 8) {
                 executeImmAdd();
             } else if (opCode == 12) {
                 //execute imm and
-            }
-            else if (opCode == 35) {
+            } else if (opCode == 35) {
                 executeImmLoadWord();
             } else if (opCode == 43) {
                 executeStoreWord();
@@ -93,13 +92,13 @@ public class Computer {
      */
     public int identifyRFormatInstr() {
         int funct = mIR.getFunct();
-        if (funct == 32) { 
-            executeRegAdd();
+        if (funct == 12) { 
+            //Terminating call
+            return 1; 
         } else if (funct == 36) {
             executeRegAnd();
-        } else if (funct == 12) {
-            //Terminating call
-            return 1;
+        } else if (funct == 32) {
+            executeRegAdd();
         }
         return 0;
     }
