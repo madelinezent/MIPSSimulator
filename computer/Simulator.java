@@ -1,6 +1,5 @@
 package computer;
 
-import computer.Computer;
 
 public class Simulator {
 
@@ -71,5 +70,4 @@ public class Simulator {
 		/* shows final configuration of computer */
 		comp.display();
 	}
-
 }

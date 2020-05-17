@@ -1,8 +1,9 @@
 package tests;
 
-import computer.BitString;
 import org.junit.Before;
 import org.junit.Test;
+
+import computer.BitString;
 
 import static org.junit.Assert.*;
 
@@ -85,20 +86,7 @@ public class BitStringTest {
 			bitString.setValue(-10);
 			fail("Can set negative value for unsigned");
 		} catch (IllegalArgumentException e) {
-
 		}
-/*
- * Had to comment out this try block since we can't 
- * test the unsigned max since it would be too large
- * to be a java data type. 
- * 
-		try {
-			bitString.setValue(65536);
-			fail("Can set more than max for unsigned");
-		} catch (IllegalArgumentException e) {
-
-		}
-*/
 	}
 
 	//changed to represent 32 bits
@@ -134,28 +122,6 @@ public class BitStringTest {
 		assertArrayEquals(bitString.getBits(), min);
 	}
 
-/* This test is commented out since ints cannot be larger
- * than 2^32-1 or -2^32 so we cannot even test for numbers
- * out of bounds for our MIPS computer since they will 
- * out of bounds on ours.
- * 
- * @Test
-	public void testSetValue2sCompInvalid() {
-		BitString bitString = new BitString();
-		try {
-			bitString.setValue2sComp(-2_147_483_649);
-			fail("Can set negative value for 2s comp");
-		} catch (IllegalArgumentException e) {
-
-		}
-		try {
-			bitString.setValue2sComp(2_147_483_648);
-			fail("Can set more than max for 2s comp");
-		} catch (IllegalArgumentException e) {
-
-		}
-	}
-*/
 	@Test
 	public void testGetValue() {
 		char ten[] = { '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
@@ -205,4 +171,142 @@ public class BitStringTest {
 		BitString partString = bitString.substring(4, 8);
 		assertArrayEquals(partString.getBits(), eightBits);
 	}
+	
+	/** Creates a new BitString and checks if it is a R-Format instruction. */
+	@Test
+	public void testRFormat() {
+	    BitString bitString = new BitString(true, false, false);
+	    assertEquals(bitString.isRFormat(), true);
+	}
+	
+	/** Creates a new BitString and checks if it is an I-Format instruction. */
+    @Test
+    public void testIFormat() {
+        BitString bitString = new BitString(false, true, false);
+        assertEquals(bitString.isIFormat(), true);
+    }
+	
+    /** Creates a new BitString and checks if is is a J-Format instruction. */
+    @Test
+    public void testJFormat() {
+        BitString bitString = new BitString(false, false, true);
+        assertEquals(bitString.isJFormat(), true);
+    }
+	
+    /** Check if instruction is set to more than 1 type by setting the 
+     * Bitstring to be both an R and I type instruction. */
+    @Test
+    public void testIllegalInstrType() {
+        try {
+            @SuppressWarnings("unused")
+            BitString bitString = new BitString(true, true, false);
+            fail("Test Failed: Instruction must only be 1 type.");
+        } catch (IllegalArgumentException ie) {
+        }
+    }
+    
+    /** Test if the correct opcode is returned. 
+     *  Set bitstring opcode to 6 and see if it returns 6.
+     */
+    @Test
+    public void testOpcode() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '0', '1', '1', '0', '0', '0', '1', '0', '0', '0','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(6, bitString.getOpcode());
+    }
+    
+    /** Test if the correct Rs is returned. 
+     *  Set Rs to 5 and see if it returns the correct value
+     */
+    @Test
+    public void testRs() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '0', '1', '1', '0', '0', '0', '1', '0', '0', '0','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(5, bitString.getRs());
+    }
+    
+    /** Test if the correct Rt is returned. 
+     *  Set Rt to 5 and see if it returns the correct value
+     */
+    @Test
+    public void testRt() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '1', '0', '0', '0', '0', '0', '1', '0', '0', '0','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(8, bitString.getRt());
+    }
+
+    /** Test if the correct Rd is returned. 
+     *  Set Rd to 20 and see if it returns the correct value
+     */
+    @Test
+    public void testRd() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '1', '0', '0', '0', '1', '0', '1', '0', '0', '0','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(20, bitString.getRd());
+    }
+    
+    /** Test if the correct shamt is returned. 
+     *  Set shamt to 16 and see if it returns the correct value
+     */
+    @Test
+    public void testShamt() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '1', '0', '0', '0', '1', '0', '1', '0', '0', '1','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(16, bitString.getShamt());
+    }
+    
+    /** Test if the correct funct is returned. 
+     *  Set funct to 36 and see if it returns the correct value
+     */
+    @Test
+    public void testFunct() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '1', '0', '0', '0', '1', '0', '1', '0', '0', '1','0', '0', 
+                    '0', '0', '1', '0', '0', '1', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(36, bitString.getFunct());
+    }
+    
+    /** Test if the correct immediate value is returned. 
+     *  Set imm to 7 and see if it returns the correct value
+     */
+    @Test
+    public void testImm() {
+            BitString bitString = new BitString();
+            char[] bits = {'0', '0', '0', '1', '1', '0', '0', '0', '1', '0', '1', 
+                    '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0','0', '0', 
+                    '0', '0', '0', '0', '0', '1', '1', '1'};
+            bitString.setBits(bits);
+            assertEquals(7, bitString.getImm());
+    }
+    
+    /** Test if the correct funct is returned. 
+     *  Set funct to 36 and see if it returns the correct value
+     */
+    @Test
+    public void testGetAddr() {
+            BitString bitString = new BitString();
+            char[] bits = {'1', '1', '1', '1', '1', '1', '0', '0', '0', '0', '0', 
+                    '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0','0', '0', 
+                    '0', '1', '0', '0', '0', '0', '0', '0'};
+            bitString.setBits(bits);
+            assertEquals(64, bitString.getAddr());
+    }
+    
 }

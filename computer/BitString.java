@@ -10,6 +10,7 @@ import java.util.Arrays;
  * substring, append, copy, setting and getting 2s complement value, etc. 
  * 
  * @author mmuppa
+ * @author aamado1
  * @author zentm
  * @author aamado1
  */
@@ -30,6 +31,18 @@ public class BitString {
     private boolean isJFormat;
 
     /**
+     * This constructs a generic BitString object.
+     * @param rFormat specifier for whether or not this BitString is a R-format instruction
+     * @param iFormat specifier for whether or not this BitString is a I-format instruction
+     * @param jFormat specifier for whether or not this BitString is a J-format instruction
+     */
+    public BitString() {
+        isRFormat = false;
+        isIFormat = false;
+        isJFormat = false;
+    }
+
+    /**
      * This constructs a BitString object specifying whether or not it this BitString
      * is a R, I, or J-format instruction
      * @param rFormat specifier for whether or not this BitString is a R-format instruction
@@ -37,6 +50,11 @@ public class BitString {
      * @param jFormat specifier for whether or not this BitString is a J-format instruction
      */
     public BitString(boolean rFormat, boolean iFormat, boolean jFormat) {
+        if (rFormat && iFormat == true || rFormat && jFormat == true 
+                || iFormat && jFormat == true) {
+            throw new IllegalArgumentException("Error: Bitstring must be either a R, J, or I format "
+                    + "instruction.");
+        }
         isRFormat = rFormat;
         isIFormat = iFormat;
         isJFormat = jFormat;
@@ -267,4 +285,37 @@ public class BitString {
     public boolean isJFormat() {
         return isJFormat;
     }
+    
+    public int getOpcode() {
+        return substring(0,6).getValue();
+    }
+    
+    public int getRs() {
+        return substring(6, 5).getValue();
+    }
+    
+    public int getRt() {
+        return substring(11, 5).getValue();
+    }
+    
+    public int getRd() {
+        return substring(16, 5).getValue();
+    }
+    
+    public int getShamt() {
+        return substring(21, 5).getValue();
+    }
+    
+    public int getFunct() {
+        return substring(26, 6).getValue();
+    }
+    
+    public int getImm() {
+        return substring(16, 16).getValue();
+    }
+    
+    public int getAddr() {
+        return substring(6, 26).getValue();
+    }
+    
 }
