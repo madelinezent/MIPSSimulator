@@ -1,3 +1,7 @@
+package computer;
+
+import computer.BitString;
+
 /**
  * Computer class comprises of memory, registers, cc and
  * can execute the instructions based on PC and IR 

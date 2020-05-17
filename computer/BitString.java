@@ -11,6 +11,7 @@ import java.util.Arrays;
  * 
  * @author mmuppa
  * @author zentm
+ * @author aamado1
  */
 public class BitString {
 

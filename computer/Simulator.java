@@ -1,6 +1,6 @@
 package computer;
 
-import org.junit.runner.Computer;
+import computer.Computer;
 
 public class Simulator {
 
