@@ -58,7 +58,7 @@ public class Computer {
         
         while (true) {
             // Fetch the instruction
-            mIR = mMemory[mPC.getValue()];
+            mIR = mInstrMemory[mPC.getValue() / 4];
             mPC.addOne();
             // Use the opcode to determine R, I, or J type
             opCode = mIR.getOpcode();
@@ -67,7 +67,8 @@ public class Computer {
                 identifyRFormatInstr();
                 return;
             }
-            // TODO - Others
+            int newPC = mPC.getValue() + 4;
+            mPC.setValue2sComp(newPC);
         }
     }
     
@@ -108,6 +109,22 @@ public class Computer {
         int and = getRegister(rs).getValue2sComp() & getRegister(rt).getValue2sComp();
         setRegister(rd, and);
     }
+    
+    /** 
+     * Set the value at a data memory address to an int value.
+     * @param memoryAddress is an int location  
+     * @param value is the int bits to place at a location
+     */
+    public void executeLoadWord(int memoryAddress, int value) {
+        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY 
+                || value < MIN_VALUE || value > MAX_VALUE) {
+            throw new IllegalArgumentException("Invalid Parameters");
+        }
+        BitString memoryValue = new BitString();
+        memoryValue.setValue2sComp(value);
+        mMemory[memoryAddress] = memoryValue;
+    }
+    
     
     /** 
      * Returns the PC value. 
@@ -151,19 +168,7 @@ public class Computer {
         System.out.println();
 
     }
-    
-    /**
-     * Loads a 32 bit word into memory at the given address. 
-     * @param address memory address
-     * @param word data or instruction or address to be loaded into memory
-     */
-    public void loadWord(int address, BitString word) {
-        if (address < 0 || address >= MAX_MEMORY) {
-            throw new IllegalArgumentException("Invalid address");
-        }
-        mMemory[address] = word;
-    }
-    
+   
     /** 
      * Returns 32 bits within an inputted register
      * @param the register
@@ -194,57 +199,41 @@ public class Computer {
     }
     
     /**
-     * Gets the value at a data memory address.
+     * Gets an instruction at a value in the instruction memory. 
      * @param memoryAddress is an int location
      * @return the BitString at the memory address
      */
-    public BitString getMemoryAddress(int memoryAddress) {
+    public BitString getInstruction(int memoryAddress) {
         if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY) {
-            throw new IllegalArgumentException();
-        }
-        return mMemory[memoryAddress];
-    }
-
-    /** 
-     * Set the value at a data memory address.
-     * @param memoryAddress is an int location  
-     * @param value is the int bits to place at a location
-     */
-    public void setMemoryAddress(int memoryAddress, int value) {
-        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY 
-                || value < MIN_VALUE || value > MAX_VALUE) {
-            throw new IllegalArgumentException("Invalid Parameters");
-        }
-        BitString memoryValue = new BitString();
-        memoryValue.setValue2sComp(value);
-        mMemory[memoryAddress] = memoryValue;
-    }
-    
-    /**
-     * Get the instruction memory at a certain address.
-     * @param memoryAddress to get value from
-     * @return the BitString at the memory address
-     */
-    public BitString getInstrMemoryAddress(int memoryAddress) {
-        if (memoryAddress < 0 || memoryAddress >= MAX_INSTR_MEMORY) {
             throw new IllegalArgumentException();
         }
         return mInstrMemory[memoryAddress];
     }
 
     /**
-     * Sets an instruction memory address to a value.
+     * Gets the instruction memory at a certain address.
+     * @param memoryAddress to get value from
+     * @return the BitString at the memory address
+     */
+    public BitString getInstr(int memoryAddress) {
+        if (memoryAddress < 0 || memoryAddress >= MAX_INSTR_MEMORY) {
+            throw new IllegalArgumentException();
+        }
+        return mInstrMemory[memoryAddress];
+    }
+    
+
+    /**
+     * Sets an instruction memory address to a word.
      * @param memoryAddress is the address to change
      * @param value is the new number to store at that address
      */
-    public void setInstrMemoryAddress(int memoryAddress, int value) {
+    public void loadInstr(int memoryAddress, BitString word) {
         if (memoryAddress < 0 || memoryAddress >= MAX_INSTR_MEMORY || 
-                value < MIN_VALUE || value > MAX_VALUE) {
+                word.getLength() != MAX_BITS) {
             throw new IllegalArgumentException("Invalid Parameters");
         }
-        BitString memoryValue = new BitString();
-        memoryValue.setValue2sComp(value);
-        mInstrMemory[memoryAddress] = memoryValue;
+        mInstrMemory[memoryAddress] = word;
     }
     
 }
