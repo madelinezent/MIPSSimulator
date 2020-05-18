@@ -32,9 +32,6 @@ public class BitString {
 
     /**
      * This constructs a generic BitString object.
-     * @param rFormat specifier for whether or not this BitString is a R-format instruction
-     * @param iFormat specifier for whether or not this BitString is a I-format instruction
-     * @param jFormat specifier for whether or not this BitString is a J-format instruction
      */
     public BitString() {
         isRFormat = false;

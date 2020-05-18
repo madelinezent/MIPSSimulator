@@ -72,13 +72,16 @@ public class Computer {
             } else if (opCode == 4) {
                 //execute branch on equal
             } else if (opCode == 8) {
+                //execute add immediate
                 executeImmAdd();
             } else if (opCode == 12) {
+                //execute and immediate
                 executeImmAnd();
-            }
-            else if (opCode == 35) {
+            } else if (opCode == 35) {
+                //execute load word
                 executeImmLoadWord();
             } else if (opCode == 43) {
+                //execute store word
                 executeImmStoreWord();
             }
         }
@@ -203,7 +206,15 @@ public class Computer {
      * BranchAddr if R[rs] == R[rt]
      */
     public void executeImmBEQ() {
-
+        int getRsValue = getRegister(mIR.getRs()).getValue2sComp();
+        int getRtValue = getRegister(mIR.getRt()).getValue2sComp();
+        if (getRsValue == getRtValue) {
+            int newPC = mPC.getValue() + 4 + mIR.getImm();
+            if (newPC > MAX_INSTR_MEMORY || newPC < 0) {
+                throw new ArrayIndexOutOfBoundsException("PC is too large/small");
+            }
+            mPC.setValue(newPC);
+        }
     }
 
     /**
@@ -349,5 +360,14 @@ public class Computer {
             throw new IllegalArgumentException("Offset too large/small");
         }
         return mMemory[offset];
+    }
+
+    public void setDataMemoryAdress(int offset, int value) {
+        if (offset < 0 || offset > MAX_MEMORY) {
+            throw new IllegalArgumentException("Offset too large/small");
+        }
+        BitString storeValue = new BitString();
+        storeValue.setValue(value);
+        mMemory[offset] = storeValue;
     }
 }

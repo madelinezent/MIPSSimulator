@@ -1,12 +1,11 @@
 package tests;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.Test;
 import computer.BitString;
 import computer.Computer;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ComputerTests {
 
@@ -297,6 +296,115 @@ public class ComputerTests {
         computerTest.loadInstr(1, halt);
         computerTest.execute();
         assertEquals(64, computerTest.getRegister(9).getValue2sComp());
+    }
+
+    /**
+     * Test add immediate instruction
+     */
+    @Test
+    public void testImmAdd() {
+        computerTest.setRegister(10, 10);
+        BitString addiInstr = new BitString();
+        // R[1] -> R[10] + 1 = 10 + 1
+        addiInstr.setBits("00100001010000010000000000000001".toCharArray());
+        computerTest.loadInstr(0, addiInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        assertEquals(11, computerTest.getRegister(1).getValue2sComp());
+    }
+
+    /**
+     * Test for arithmetic overflow in add immediate instruction
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void testImmAddIAE() {
+        computerTest.setRegister(10, MAX_VALUE);
+        BitString addiInstr = new BitString(false, true, false);
+        // R[1] -> R[10] + 1 = MAX_VALUE + 1, therefore should be overflow
+        addiInstr.setBits("00100001010000010000000000000001".toCharArray());
+        computerTest.loadInstr(0, addiInstr);
+        computerTest.execute();
+    }
+
+    /**
+     * Test load word instruction
+     */
+    @Test
+    public void testImmLoadWord() {
+        int expectedValue = 10;
+        // M[40] = expectedValue
+        computerTest.setDataMemoryAdress(40, expectedValue);
+        BitString lwInstr = new BitString(false, true, false);
+        // R[10] = M[10]
+        lwInstr.setBits("10001100000010100000000000101000".toCharArray());
+        computerTest.loadInstr(0, lwInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        assertEquals(expectedValue, computerTest.getRegister(10).getValue2sComp());
+    }
+
+    /**
+     * Test for arithmetic overflow from result of target offset calculation
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void testImmLoadWordIAE() {
+        int expectedValue = 10;
+        BitString lwInstr = new BitString(false, true, false);
+        computerTest.setRegister(0, MAX_VALUE);
+        // R[10] = M[R[0] + Imm]
+        lwInstr.setBits("10001100000010100000000000000001".toCharArray());
+        computerTest.loadInstr(0, lwInstr);
+        computerTest.execute();
+    }
+
+    /**
+     * Test for arithmetic overflow from result of target offset calculation
+     */
+    @Test (expected = ArrayIndexOutOfBoundsException.class)
+    public void testImmLoadWordAIOOB() {
+        int expectedValue = 10;
+        BitString lwInstr = new BitString(false, true, false);
+        computerTest.setRegister(1, 500);
+        // R[10] = M[R[1] + Imm]
+        lwInstr.setBits("10001100001010100000000000000001".toCharArray());
+        computerTest.loadInstr(0, lwInstr);
+        computerTest.execute();
+    }
+
+    /**
+     * Tests branch on equal instruction
+     */
+    @Test
+    public void testBranchOnEqual() {
+        /*
+         * Test currentPC by checking whether or not it incremented by 4. Hopefully not
+         */
+        int currentPC = computerTest.getMyPC().getValue();
+        computerTest.setRegister(9, 10);
+        computerTest.setRegister(10, 10);
+        BitString beqInstr = new BitString(false, true, false);
+        /* Jump PC = PC + 4 + 31. Tests R[9] = R[10] */
+        beqInstr.setBits("00010001001010100000000000011111".toCharArray());
+        computerTest.loadInstr(0, beqInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        int newPC = computerTest.getMyPC().getValue();
+        assertNotEquals(currentPC, newPC);
+    }
+
+    /**
+     * Test branch on equal for IllegalArgumentException for when offset calculates past capacity
+     * of instruction memory
+     */
+    @Test (expected = ArrayIndexOutOfBoundsException.class)
+    public void testBranchOnEqualAIOOB() {
+        computerTest.setRegister(9, 10);
+        computerTest.setRegister(10, 10);
+        BitString beqInstr = new BitString(false, true, false);
+        /* Jump PC = PC + 4 + 255. Tests R[9] = R[10] */
+        beqInstr.setBits("00010001001010100000000011111111".toCharArray());
+        computerTest.loadInstr(0, beqInstr);
+        computerTest.execute();
     }
 }
 
