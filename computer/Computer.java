@@ -54,13 +54,12 @@ public class Computer {
      * till HALT instruction is encountered. 
      */
     public void execute() {
-        BitString opCodeStr;
         int opCode;
-        
         while (true) {
             // Fetch the instruction
             mIR = mInstrMemory[mPC.getValue() / 4];
-            mPC.addOne();
+            int newPC = mPC.getValue() + 4;
+            mPC.setValue2sComp(newPC);
             // Use the opcode to determine R, I, or J type
             opCode = mIR.getOpcode();
             // What instruction is this?
@@ -71,18 +70,17 @@ public class Computer {
             } else if (opCode == 4) {
                 //execute jal
             } else if (opCode == 4) {
-                //execute imm branch on equal
+                //execute branch on equal
             } else if (opCode == 8) {
                 executeImmAdd();
             } else if (opCode == 12) {
-                //execute imm and
-            } else if (opCode == 35) {
+                executeImmAnd();
+            }
+            else if (opCode == 35) {
                 executeImmLoadWord();
             } else if (opCode == 43) {
-                executeStoreWord();
+                executeImmStoreWord();
             }
-            int newPC = mPC.getValue() + 4;
-            mPC.setValue2sComp(newPC);
         }
     }
     
@@ -92,9 +90,9 @@ public class Computer {
      */
     public int identifyRFormatInstr() {
         int funct = mIR.getFunct();
-        if (funct == 12) { 
-            //Terminating call
-            return 1; 
+        if (funct == 12) {  // Syscall, since we didn't need to implement it for the
+            return 1;       // assignment requirements, for our purposes it will assume
+                            // v0 is 10 and that we are halting
         } else if (funct == 36) {
             executeRegAnd();
         } else if (funct == 32) {
@@ -142,6 +140,18 @@ public class Computer {
         }
         setRegister(rt, sum);
     }
+    
+    /**
+     * Does an add immediate operation storing R[rt] = R[rs] and SignExtImm
+     */
+     public void executeImmAnd() {
+         int rs = mIR.getRs();
+         int rt = mIR.getRt();
+         int imm = mIR.getImm();
+         int valueRs = mRegisters[rs].getValue2sComp();
+         int and = valueRs & imm;
+         setRegister(rt, and);
+     }
 
     /**
      * Does an immediate load word operation storing R[rt] with
@@ -173,17 +183,17 @@ public class Computer {
      * Set the value at a data memory address to the word at Rt.
      * R[rt] = M[R[rs] + SignExtImm]
      */
-    public void executeStoreWord() {
+    public void executeImmStoreWord() {
         int rs = getRegister(mIR.getRs()).getValue2sComp();
         int imm = mIR.getImm();
-        int memoryAddress = getRegister(rs).getValue2sComp() + imm;
-        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY) {
-            throw new IllegalArgumentException("Invalid Parameters");
-        }
+        int memoryAddress = rs + imm;
         // Check if R[rs] + SignExtImm creates arithmetic overflow
         if ((rs > 0 && imm > 0 && memoryAddress < 0)
                 || (rs < 0 && imm < 0 && memoryAddress > 0)) {
             throw new IllegalArgumentException("Arithmetic Overflow from offset add.");
+        }
+        if (memoryAddress < 0 || memoryAddress >= MAX_MEMORY) {
+            throw new IllegalArgumentException("Invalid Parameters");
         }
         mMemory[memoryAddress] = getRegister(mIR.getRt());
     }
@@ -280,7 +290,7 @@ public class Computer {
             throw new IllegalArgumentException("Invalid Parameters");
         }
         if (register == 0) {
-            throw new IllegalArgumentException("Cannot change the value in regsiter 0!");
+            throw new IllegalArgumentException("Cannot change the value in register 0!");
         }
         BitString registerValue = new BitString();
         registerValue.setValue2sComp(value);
@@ -298,7 +308,7 @@ public class Computer {
             throw new IllegalArgumentException("Invalid Parameters");
         }
         if (register == 0) {
-            throw new IllegalArgumentException("Cannot change the value in regsiter 0!");
+            throw new IllegalArgumentException("Cannot change the value in register 0!");
         }
         mRegisters[register] = value;
     }
