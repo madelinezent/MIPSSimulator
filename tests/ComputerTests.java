@@ -261,7 +261,7 @@ public class ComputerTests {
     }
     
     /**
-     * Tests if the store word instruction can detect arithmetic overflow.
+     * Tests if the store word instruction can detect arithmetic overflow from an rs + immediate.
      * 
      * 1. Load instr memory with sw $t1, 20($t2)
      * 2. Fill register 10 ($t2) with MAX_VALUE, fill register 9 ($t1) with 25
@@ -277,7 +277,7 @@ public class ComputerTests {
         computerTest.loadInstr(1, halt);
         try {
             computerTest.execute();
-            fail("SW allows memory to be stored in a negative location.");
+            fail("SW allows does not detect arithmetic overflow.");
         } catch (IllegalArgumentException ie) {
         }
     }
