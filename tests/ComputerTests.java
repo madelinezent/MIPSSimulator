@@ -131,6 +131,20 @@ public class ComputerTests {
     }   
 
     /**
+     * If the halt doesn't work, PC will continue to increment until it
+     * throws an array out of bounds exception.
+     */
+    @Test
+    public void testHalt() {
+        try {
+            computerTest.loadInstr(0, halt);
+            computerTest.execute();
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            fail("Halt instruction doesn't work.");
+        }
+    }
+    
+    /**
      * Tests basic functionality of register add.
      * 1. Load instr add $9, $10, $11
      * 2. Calculate reg addition 
@@ -183,9 +197,107 @@ public class ComputerTests {
         computerTest.loadInstr(0, andInstr);
         computerTest.loadInstr(1, halt);
         computerTest.execute();
-        System.out.println(computerTest.getRegister(4).getValue2sComp());
         assertEquals(48, computerTest.getRegister(4).getValue2sComp());
     }  
+    
+
+    /**
+     * Tests if the register bitwise works correctly for negative values.
+     * 1. Load instr and $4, $5, $6
+     * 2. Fill register $5 with -20 and $6 with -12
+     * 3. Call function and check if Rd was filled with -28
+     */
+    @Test
+    public void testRegAndNegative() {
+        computerTest.setRegister(5, -20);
+        computerTest.setRegister(6, -12);
+        BitString andInstr = new BitString();
+        andInstr.setBits("00000000101001100010000000100100".toCharArray());
+        computerTest.loadInstr(0, andInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        assertEquals(-28, computerTest.getRegister(4).getValue2sComp());
+    }  
+    
+    /**
+     * Tests if the store word instruction works for viable inputs.
+     * 1. Load instr memory with sw $t1, 20($t2)
+     * 2. Fill register 10 ($t2) with 50, fill register 9 ($t1) with 25
+     * 3. See if M[50+20] = 25
+     */
+    @Test
+    public void testImmStoreWord() {
+        computerTest.setRegister(10, 50);
+        computerTest.setRegister(9, 25);
+        BitString swInstr = new BitString();
+        swInstr.setBits("10101101010010010000000000010100".toCharArray());
+        computerTest.loadInstr(0, swInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        System.out.println(computerTest.getDataMemoryAddress(70).getValue2sComp());
+        assertEquals(25, computerTest.getDataMemoryAddress(70).getValue2sComp());
+    }  
+    
+    /**
+     * Tests if the store word instruction works when the memory address
+     * calculated is illegal. 
+     * 1. Load instr memory with sw $t1, 20($t2)
+     * 2. Fill register 10 ($t2) with -30, fill register 9 ($t1) with 25
+     * 3. See if M[-30+20] triggers and exception
+     */
+    @Test
+    public void testImmStoreWordIllegal() {
+        computerTest.setRegister(10, -30);
+        computerTest.setRegister(9, 25);
+        BitString swInstr = new BitString();
+        swInstr.setBits("10101101010010010000000000010100".toCharArray());
+        computerTest.loadInstr(0, swInstr);
+        computerTest.loadInstr(1, halt);
+        try {
+            computerTest.execute();
+            fail("SW allows memory to be stored in a negative location.");
+        } catch (IllegalArgumentException ie) {
+        }
+    }
+    
+    /**
+     * Tests if the store word instruction can detect arithmetic overflow.
+     * 
+     * 1. Load instr memory with sw $t1, 20($t2)
+     * 2. Fill register 10 ($t2) with MAX_VALUE, fill register 9 ($t1) with 25
+     * 3. See if M[MAX_VALUE+20] triggers an exception
+     */
+    @Test
+    public void testImmStoreWordOverflow() {
+        computerTest.setRegister(10, MAX_VALUE);
+        computerTest.setRegister(9, 25);
+        BitString swInstr = new BitString();
+        swInstr.setBits("10101101010010010000000000010100".toCharArray());
+        computerTest.loadInstr(0, swInstr);
+        computerTest.loadInstr(1, halt);
+        try {
+            computerTest.execute();
+            fail("SW allows memory to be stored in a negative location.");
+        } catch (IllegalArgumentException ie) {
+        }
+    }
+    
+    /**
+     * Tests if the and immediate instruction for viable input. 1. Load instr memory
+     * with andi $t1, $t2, 100 
+     * 2. Fill register $t2 with 89 
+     * 3. See if $t1 becomes the correct andi value of 64
+     */
+    @Test
+    public void testImmAnd() {
+        computerTest.setRegister(10, 89);
+        BitString andiInstr = new BitString();
+        andiInstr.setBits("00110001010010010000000001100100".toCharArray());
+        computerTest.loadInstr(0, andiInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        assertEquals(64, computerTest.getRegister(9).getValue2sComp());
+    }
 }
 
 
