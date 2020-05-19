@@ -209,7 +209,7 @@ public class Computer {
         int getRsValue = getRegister(mIR.getRs()).getValue2sComp();
         int getRtValue = getRegister(mIR.getRt()).getValue2sComp();
         if (getRsValue == getRtValue) {
-            int newPC = mPC.getValue() + 4 + mIR.getImm();
+            int newPC = mPC.getValue() + 4 + (mIR.getImm() * 4);
             if (newPC > MAX_INSTR_MEMORY || newPC < 0) {
                 throw new ArrayIndexOutOfBoundsException("PC is too large/small");
             }
@@ -221,7 +221,24 @@ public class Computer {
      * Does an jump operation storing PC with JumpAddr
      */
     public void executeJJump() {
+        BitString concatenation = mPC.substring(0, 4);
 
+        BitString address = new BitString(false, false, true);
+        address.setValue2sComp(mIR.getAddr());
+        /* Append address onto top 4 bits */
+        concatenation.append(address);
+
+        /* Get two zeros to append on the end */
+        BitString zeros = new BitString();
+        zeros.setValue(0);
+        zeros = zeros.substring(0, 2);
+        concatenation.append(zeros);
+
+        if (concatenation.getValue2sComp() < 0
+                || concatenation.getValue2sComp() > MAX_INSTR_MEMORY) {
+            throw new ArrayIndexOutOfBoundsException("Offset to large/small");
+        }
+        mPC = concatenation;
     }
     
     /** 
