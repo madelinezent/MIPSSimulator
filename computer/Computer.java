@@ -223,15 +223,13 @@ public class Computer {
     public void executeJJump() {
         BitString concatenation = mPC.substring(0, 4);
 
-        BitString address = new BitString(false, false, true);
-        address.setValue2sComp(mIR.getAddr());
+        BitString address = mIR.substring(6, 26);
         /* Append address onto top 4 bits */
         concatenation.append(address);
 
         /* Get two zeros to append on the end */
         BitString zeros = new BitString();
-        zeros.setValue(0);
-        zeros = zeros.substring(0, 2);
+        zeros.setBits("00".toCharArray());
         concatenation.append(zeros);
 
         if (concatenation.getValue2sComp() < 0

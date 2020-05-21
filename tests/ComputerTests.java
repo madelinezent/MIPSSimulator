@@ -406,6 +406,50 @@ public class ComputerTests {
         computerTest.loadInstr(0, beqInstr);
         computerTest.execute();
     }
+
+    /**
+     * Test for jump instruction. It takes a jump instruction and compares the
+     *
+     */
+    @Test
+    public void testJump() {
+        BitString jumpInstr = new BitString(false, false, true);
+        jumpInstr.setBits("00001000000000000000000000001111".toCharArray());
+        BitString expectedPC = calculateJumpPC(computerTest.getMyPC(), jumpInstr);
+        computerTest.loadInstr(0, jumpInstr);
+        computerTest.loadInstr(1, halt);
+        computerTest.execute();
+        assertEquals(expectedPC.getValue2sComp(), computerTest.getMyPC().getValue2sComp());
+    }
+
+    /**
+     * Calculates the PC from a jump instruction given the instructions current
+     * PC and the jump instruction.
+     * @param pc the current PC of the instruction
+     * @param jump the jump instruction
+     * @return expected calculated new PC given the jump instruction and current
+     * PC
+     */
+    private BitString calculateJumpPC(BitString pc, BitString jump) {
+        /* Beginning of new PC. Top 4 bits of PC */
+        BitString concatenation = pc.substring(0, 4);
+
+        BitString address = jump.substring(6, 26);
+        concatenation.append(address);
+
+        BitString twoZeros = new BitString();
+        twoZeros.setBits("00".toCharArray());
+        concatenation.append(twoZeros);
+        return concatenation;
+    }
+
+    /**
+     *
+     */
+    @Test (expected = ArrayIndexOutOfBoundsException.class)
+    public void testJumpAIOOB() {
+
+    }
 }
 
 
