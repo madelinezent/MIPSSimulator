@@ -377,7 +377,7 @@ public class ComputerTests {
     @Test
     public void testBranchOnEqual() {
         /*
-         * Test currentPC by checking whether or not it incremented by 4. Hopefully not
+         * Test currentPC by checking whether or not it incremented by 4.
          */
         int currentPC = computerTest.getMyPC().getValue();
         computerTest.setRegister(9, 10);
@@ -448,6 +448,23 @@ public class ComputerTests {
         try {
            computerTest.execute();
            fail("Jump register doesn't detect AIOOBE.");
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+        }
+    }
+    
+    /**
+     * Test if it throws an exception when the register we jump to is not %4. 
+     */
+    @Test
+    public void testJumpRegisterNotMultipleOfFour() {
+        BitString jumpRInstr = new BitString();
+        jumpRInstr.setBits("00000001001000000000000000001000".toCharArray());
+        computerTest.setRegister(9, 7);
+        computerTest.loadInstr(0, jumpRInstr);
+        computerTest.loadInstr(1, halt);
+        try {
+           computerTest.execute();
+           fail("Register can change PC to a number that is not %4");
         } catch (ArrayIndexOutOfBoundsException aioobe) {
         }
     }
