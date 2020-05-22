@@ -93,7 +93,9 @@ public class Computer {
      */
     public int identifyRFormatInstr() {
         int funct = mIR.getFunct();
-        if (funct == 12) {  // Syscall, since we didn't need to implement it for the
+        if (funct == 8) {
+            executeJJumpRegister();
+        } else if (funct == 12) {  // Syscall, since we didn't need to implement it for the
             return 1;       // assignment requirements, for our purposes it will assume
                             // v0 is 10 and that we are halting
         } else if (funct == 36) {
@@ -239,6 +241,18 @@ public class Computer {
         mPC = concatenation;
     }
     
+    /**
+     * Does a jump operation to a register.
+     */
+    public void executeJJumpRegister() {
+       int rs = mIR.getRs();
+       int rsValue = getRegister(rs).getValue2sComp();
+       if (rsValue / 4 > MAX_INSTR_MEMORY || rsValue < 0) {
+           throw new ArrayIndexOutOfBoundsException("Invalid JR input");
+       }
+       mPC.setValue2sComp(rsValue);
+    }
+    
     /** 
      * Returns the PC value. 
      */
@@ -246,54 +260,6 @@ public class Computer {
         return mPC;
     }
 
-    /**
-     * Displays the computer's state on the console.
-     */
-    public void display() {
-        System.out.print("\nPC ");
-        mPC.display(true);
-        System.out.print("   ");
-
-        System.out.print("IR ");
-        mPC.display(true);
-        System.out.print("   ");
-        System.out.println();
-
-        for (int i = 0; i < MAX_REGISTERS; i++) {
-            System.out.printf("R%d ", i);
-            mRegisters[i].display(true);
-            if (i % 3 == 2) {
-                System.out.println();
-            } else {
-                System.out.print("   ");
-            }
-        }
-        System.out.println();
-
-        for (int i = 0; i < MAX_INSTR_MEMORY; i++) {
-            System.out.printf("IM%3d ", i);
-            mInstrMemory[i].display(true);
-            if (i % 3 == 2) {
-                System.out.println();
-            } else {
-                System.out.print("   ");
-            }
-        }
-        System.out.println();
-
-        for (int i = 0; i < MAX_MEMORY; i++) {
-            System.out.printf("DM%3d ", i);
-            mMemory[i].display(true);
-            if (i % 3 == 2) {
-                System.out.println();
-            } else {
-                System.out.print("   ");
-            }
-        }
-        System.out.println();
-
-    }
-   
     /** 
      * Returns 32 bits within an inputted register
      * @param register
@@ -324,7 +290,7 @@ public class Computer {
     }
 
     /**
-     * Sets the value within a register directly to a BitString .
+     * Sets the value within a register directly to a BitString.
      * @param register to change value
      * @param value to change register to a given BitString
      */
@@ -384,5 +350,52 @@ public class Computer {
         BitString storeValue = new BitString();
         storeValue.setValue(value);
         mMemory[offset] = storeValue;
+    }
+    
+    /**
+     * Displays the computer's state on the console.
+     */
+    public void display() {
+        System.out.print("\nPC ");
+        mPC.display(true);
+        System.out.print("   ");
+
+        System.out.print("IR ");
+        mPC.display(true);
+        System.out.print("   ");
+        System.out.println();
+
+        for (int i = 0; i < MAX_REGISTERS; i++) {
+            System.out.printf("R%d ", i);
+            mRegisters[i].display(true);
+            if (i % 3 == 2) {
+                System.out.println();
+            } else {
+                System.out.print("   ");
+            }
+        }
+        System.out.println();
+
+        for (int i = 0; i < MAX_INSTR_MEMORY; i++) {
+            System.out.printf("IM%3d ", i);
+            mInstrMemory[i].display(true);
+            if (i % 3 == 2) {
+                System.out.println();
+            } else {
+                System.out.print("   ");
+            }
+        }
+        System.out.println();
+
+        for (int i = 0; i < MAX_MEMORY; i++) {
+            System.out.printf("DM%3d ", i);
+            mMemory[i].display(true);
+            if (i % 3 == 2) {
+                System.out.println();
+            } else {
+                System.out.print("   ");
+            }
+        }
+        System.out.println();
     }
 }
