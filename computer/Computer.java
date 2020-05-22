@@ -60,16 +60,13 @@ public class Computer {
             mIR = mInstrMemory[mPC.getValue() / 4];
             int newPC = mPC.getValue() + 4;
             mPC.setValue2sComp(newPC);
-            // Use the opcode to determine R, I, or J type
+            // Use the opcode to determine instruction
             opCode = mIR.getOpcode();
-            // What instruction is this?
             if (opCode == 0) { // R-type
                 if (identifyRFormatInstr() == 1) { break; }
             } else if (opCode == 2) {
                 //execute jump
                 executeJJump();
-            } else if (opCode == 4) {
-                //execute jal
             } else if (opCode == 4) {
                 //execute branch on equal
                 executeImmBEQ();
@@ -213,7 +210,7 @@ public class Computer {
         int getRsValue = getRegister(mIR.getRs()).getValue2sComp();
         int getRtValue = getRegister(mIR.getRt()).getValue2sComp();
         if (getRsValue == getRtValue) {
-            int newPC = mPC.getValue() + 4 + (mIR.getImm() * 4);
+            int newPC = mPC.getValue() + (mIR.getImm() * 4);
             if (newPC > MAX_INSTR_MEMORY || newPC < 0) {
                 throw new ArrayIndexOutOfBoundsException("PC is too large/small");
             }
@@ -249,7 +246,7 @@ public class Computer {
     public void executeJJumpRegister() {
        int rs = mIR.getRs();
        int rsValue = getRegister(rs).getValue2sComp();
-       if (rsValue / 4 > MAX_INSTR_MEMORY || rsValue < 0) {
+       if (rsValue / 4 > MAX_INSTR_MEMORY || rsValue < 0 || rsValue % 4 != 0) {
            throw new ArrayIndexOutOfBoundsException("Invalid JR input");
        }
        mPC.setValue2sComp(rsValue);
@@ -357,7 +354,7 @@ public class Computer {
     /**
      * Displays the computer's state on the console.
      */
-    public void display() {
+    public void display(int maxInstr, int maxData) {
         System.out.print("\nPC ");
         mPC.display(true);
         System.out.print("   ");
@@ -365,8 +362,9 @@ public class Computer {
         System.out.print("IR ");
         mPC.display(true);
         System.out.print("   ");
-        System.out.println();
-
+        System.out.println("\n");
+        
+        System.out.println("Registers: ");
         for (int i = 0; i < MAX_REGISTERS; i++) {
             System.out.printf("R%d ", i);
             mRegisters[i].display(true);
@@ -376,9 +374,10 @@ public class Computer {
                 System.out.print("   ");
             }
         }
-        System.out.println();
-
-        for (int i = 0; i < MAX_INSTR_MEMORY; i++) {
+        System.out.println("\n");
+        System.out.println("Instruction Memory: ");
+        
+        for (int i = 0; i < maxInstr; i++) {
             System.out.printf("IM%3d ", i);
             mInstrMemory[i].display(true);
             if (i % 3 == 2) {
@@ -387,10 +386,11 @@ public class Computer {
                 System.out.print("   ");
             }
         }
-        System.out.println();
-
-        for (int i = 0; i < MAX_MEMORY; i++) {
-            System.out.printf("DM%3d ", i);
+        System.out.println("\n");
+        System.out.println("Data Memory: ");
+        
+        for (int i = 0; i < maxData; i++) {
+            System.out.printf("DM%5d ", i);
             mMemory[i].display(true);
             if (i % 3 == 2) {
                 System.out.println();
@@ -398,6 +398,6 @@ public class Computer {
                 System.out.print("   ");
             }
         }
-        System.out.println();
+        System.out.println("\n");
     }
 }
