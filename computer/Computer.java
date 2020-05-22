@@ -67,10 +67,12 @@ public class Computer {
                 if (identifyRFormatInstr() == 1) { break; }
             } else if (opCode == 2) {
                 //execute jump
+                executeJJump();
             } else if (opCode == 4) {
                 //execute jal
             } else if (opCode == 4) {
                 //execute branch on equal
+                executeImmBEQ();
             } else if (opCode == 8) {
                 //execute add immediate
                 executeImmAdd();
@@ -227,12 +229,12 @@ public class Computer {
 
         BitString address = mIR.substring(6, 26);
         /* Append address onto top 4 bits */
-        concatenation.append(address);
+        concatenation = concatenation.append(address);
 
         /* Get two zeros to append on the end */
         BitString zeros = new BitString();
         zeros.setBits("00".toCharArray());
-        concatenation.append(zeros);
+        concatenation = concatenation.append(zeros);
 
         if (concatenation.getValue2sComp() < 0
                 || concatenation.getValue2sComp() > MAX_INSTR_MEMORY) {

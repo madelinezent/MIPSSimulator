@@ -453,18 +453,24 @@ public class ComputerTests {
     }
     
     /**
-     * Test for jump instruction. It takes a jump instruction and compares the
-     *
+     * Test for jump instruction.
      */
     @Test
     public void testJump() {
         BitString jumpInstr = new BitString();
-        jumpInstr.setBits("00001000000000000000000000001111".toCharArray());
+        /* Jump should alter PC to be equal to 8 */
+        jumpInstr.setBits("00001000000000000000000000000010".toCharArray());
         BitString expectedPC = calculateJumpPC(computerTest.getMyPC(), jumpInstr);
+        /* Jump at instruction memory address 0 */
         computerTest.loadInstr(0, jumpInstr);
-        computerTest.loadInstr(1, halt);
+        /* Jump to PC = 8 */
+        computerTest.loadInstr(2, halt);
         computerTest.execute();
-        assertEquals(expectedPC.getValue2sComp(), computerTest.getMyPC().getValue2sComp());
+        /*
+         * Must minus 4 from actual PC value because .execute() increments
+         * PC by 4 immediately
+         */
+        assertEquals(expectedPC.getValue(), computerTest.getMyPC().getValue() - 4);
     }
 
     /**
@@ -480,11 +486,11 @@ public class ComputerTests {
         BitString concatenation = pc.substring(0, 4);
 
         BitString address = jump.substring(6, 26);
-        concatenation.append(address);
+        concatenation = concatenation.append(address);
 
         BitString twoZeros = new BitString();
         twoZeros.setBits("00".toCharArray());
-        concatenation.append(twoZeros);
+        concatenation = concatenation.append(twoZeros);
         return concatenation;
     }
 
@@ -493,6 +499,10 @@ public class ComputerTests {
      */
     @Test (expected = ArrayIndexOutOfBoundsException.class)
     public void testJumpAIOOB() {
-
+        BitString jumpInstr = new BitString();
+        jumpInstr.setBits("00001000000000000000000000001111".toCharArray());
+        BitString expectedPC = calculateJumpPC(computerTest.getMyPC(), jumpInstr);
+        computerTest.loadInstr(0, jumpInstr);
+        computerTest.execute();
     }
 }
