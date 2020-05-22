@@ -408,12 +408,57 @@ public class ComputerTests {
     }
 
     /**
+     * Test for jump to register instruction.
+     * 1. Put jr $t1 (9) in instr memory
+     * 2. Fill $t1 with 
+     * 3. Put an and after jr instr and halt at target jump location.
+     * 4. Execute
+     * 5. See if $ra is correct
+     * 6. See if the add executed, if it did not then we correctly jumped
+     */
+    @Test
+    public void testJumpRegister() {
+        BitString jumpRInstr = new BitString();
+        jumpRInstr.setBits("00000001001000000000000000001000".toCharArray());
+        BitString andInstr = new BitString(); //and $4, $5, $6
+        andInstr.setBits("00000000101001100010000000100100".toCharArray());
+        computerTest.setRegister(9, 8);
+        computerTest.setRegister(5, 12);
+        computerTest.setRegister(6, 12);
+        computerTest.setRegister(4, 0);
+        computerTest.loadInstr(0, jumpRInstr);
+        computerTest.loadInstr(1, andInstr);
+        computerTest.loadInstr(2, halt);
+        computerTest.execute();
+        assertEquals(0, computerTest.getRegister(4).getValue2sComp());
+    }
+    
+    /**
+     * Test for IOOBE for jump register.
+     * 1. Set an illegal instruction memory location in $t1 
+     * 2. Load instruction memory with jr $t1
+     */
+    @Test
+    public void testJumpRegisterAIOOBE() {
+        BitString jumpRInstr = new BitString();
+        jumpRInstr.setBits("00000001001000000000000000001000".toCharArray());
+        computerTest.setRegister(9, -5);
+        computerTest.loadInstr(0, jumpRInstr);
+        computerTest.loadInstr(1, halt);
+        try {
+           computerTest.execute();
+           fail("Jump register doesn't detect AIOOBE.");
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+        }
+    }
+    
+    /**
      * Test for jump instruction. It takes a jump instruction and compares the
      *
      */
     @Test
     public void testJump() {
-        BitString jumpInstr = new BitString(false, false, true);
+        BitString jumpInstr = new BitString();
         jumpInstr.setBits("00001000000000000000000000001111".toCharArray());
         BitString expectedPC = calculateJumpPC(computerTest.getMyPC(), jumpInstr);
         computerTest.loadInstr(0, jumpInstr);
@@ -451,5 +496,3 @@ public class ComputerTests {
 
     }
 }
-
-
