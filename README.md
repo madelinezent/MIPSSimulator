@@ -1,5 +1,5 @@
 
-Students: Alex Amado and Deline Zent
+Students: Deline Zent and Alex Amado
 Class:TCSS 372 - Computer Architecture
 Project: 2A - MIPS Simulator
 
