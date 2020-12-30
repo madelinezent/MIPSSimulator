@@ -26,10 +26,3 @@ liberties.
 Tests: All of our tests are written in JUnit 4. We have written tests for every method in
 the Computer class and for every additional method we wrote after the starter code in the 
 BitString class. These tests can be found in the tests folder.
-
-Improvements: Because we both worked on different instructions, our idea of implementing 
-the BitString constructor was a bit different and we took two different approaches which
-ended up still working but make our code look less cohesive. Alex set R, I, or J-types
-to each BitString, whereas, Deline determined the types based on decoding the bits. Both
-gave the same result, however, if we had more time we would write them to be similar 
-to look more clean. 
