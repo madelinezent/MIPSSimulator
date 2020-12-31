@@ -5,7 +5,15 @@ Project: 2A - MIPS Simulator
 
 Description: MIPS simulator emulates the MIPS ISA and works with instructions add,
 and, addi, andi, lw, sw, beq, j, jr, and syscall (where the syscall line is assumed
-to always be a terminating call in our implementation.)
+to always be a terminating call in our implementation). This enabled us to understand
+how machine code works at a very intricate level and we were able to implement 90% 
+junit test coverage on all of our classes. 
+
+Some Console Output of the Changing Machine Code
+![console log](ConsoleOutputSnip.png)
+
+Junit Coverage Proof
+![junit coverage](JUnitCoverage.png)
 
 How To Run: To see an example of how our code works, you can go into the Simulator class
 where we have already pre-filled the computer with instructions. We have tested every
